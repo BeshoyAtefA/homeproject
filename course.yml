@@ -1,1 +1,57 @@
 
+rules:
+    # Rules that govern when a new session may be started and whether
+    # existing sessions may be listed.
+
+    start:
+    -
+        # Members of the listed roles may start a new session of this
+        # flow if they have fewer than 2 existing sessions if the current
+        # time is before the event 'end_week 1'.
+
+        if_before: end_week 1
+        if_has_role: [student, ta, instructor]
+        if_has_fewer_sessions_than: 2
+        may_start_new_session: True
+        may_list_existing_sessions: True
+
+    -
+        # Otherwise, no new sessions will be allowed,
+        # but existing ones may be listed.
+
+        may_start_new_session: False
+        may_list_existing_sessions: True
+
+    # Rules that govern what a user may do with an existing session.
+    access:
+    -
+         # Before the event 'end_week 2', a user may view, submit answers
+         # to the flow, and see the grade they received for their answers.
+
+         if_before: end_week 2
+         permissions: [view, modify, see_correctness]
+
+    -
+         # Afterwards, they will also be allowed to see the correct answer.
+         permissions: [view, modify, see_correctness, see_answer_after_submission]
+
+    # Rules that govern how (permanent) grades are generated from the
+    # results of a flow.
+
+    # Grades for this flow are recorded under grade identifier 'la_quiz'.
+    # Multiple such grades (if present) are aggregated by taking their maximum.
+
+    grade_identifier: la_quiz
+    grade_aggregation_strategy: max_grade
+
+    grading:
+    -
+        # If the user completes the flow before the event 'end_week 1', they
+        # receive full credit.
+
+        if_completed_before: end_week 1
+        credit_percent: 100
+
+    -
+        # Otherwise, no credit is given.
+        credit_percent: 0
